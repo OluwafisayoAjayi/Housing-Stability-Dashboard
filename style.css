@@ -400,3 +400,143 @@ footer {
   .score-panel { flex-direction: column; align-items: flex-start; }
   .methodology { margin: 0 0.8rem 0.8rem; }
 }
+
+html, body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+img, canvas, svg {
+  max-width: 100%;
+}
+
+@media (max-width: 600px) {
+  body {
+    font-size: 15px;
+  }
+
+  .hero {
+    padding: 1.1rem;
+    gap: 0.7rem;
+  }
+
+  .hero h1 {
+    font-size: 1.75rem;
+    line-height: 1.15;
+  }
+
+  .subtitle {
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
+
+  .badge {
+    width: 100%;
+    border-radius: 14px;
+    line-height: 1.4;
+  }
+
+  .layout {
+    display: block;
+    padding: 0.65rem;
+  }
+
+  .panel {
+    width: 100%;
+    max-width: 100%;
+    padding: 0.9rem;
+    border-radius: 14px;
+    margin-bottom: 0.85rem;
+  }
+
+  .grid.two,
+  .grid.three,
+  .metrics-grid,
+  .charts-grid,
+  .context-grid,
+  .scenario-grid,
+  .form-actions {
+    grid-template-columns: 1fr !important;
+  }
+
+  input,
+  select,
+  button {
+    font-size: 16px;
+    min-height: 46px;
+  }
+
+  .score-panel {
+    align-items: center;
+    text-align: center;
+  }
+
+  .score-ring {
+    min-width: 112px;
+    width: 112px;
+    height: 112px;
+  }
+
+  .score-ring span {
+    width: 78px;
+    height: 78px;
+    font-size: 1.4rem;
+  }
+
+  .metric-card strong {
+    font-size: 1.25rem;
+  }
+
+  .chart-card {
+    padding: 0.75rem;
+    overflow: hidden;
+  }
+
+  .chart-card h3 {
+    font-size: 0.95rem;
+    line-height: 1.35;
+  }
+
+  canvas {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 220px !important;
+  }
+
+  .legend-item {
+    align-items: flex-start;
+    gap: 0.4rem;
+    font-size: 0.82rem;
+  }
+
+  .legend-label {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .context-grid strong,
+  .scenario-grid strong {
+    font-size: 1rem;
+    overflow-wrap: anywhere;
+  }
+
+  .methodology {
+    margin: 0 0.65rem 0.65rem;
+    padding: 0.9rem;
+    overflow-x: hidden;
+  }
+
+  .methodology p,
+  .methodology li {
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .methodology code {
+    display: inline;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+}
