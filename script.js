@@ -413,16 +413,18 @@ function drawBudgetPie(values, household) {
 }
 
 function drawHorizontalBarChart(canvasId, rows, options = {}) {
-  const { ctx, width, height } = prepareCanvas(canvasId);
+  const { ctx, width } = prepareCanvas(canvasId);
   const maxValue = options.maxValue || Math.max(...rows.map(r => r.value), 1);
-  const left = 110;
-  const right = 26;
-  const top = 32;
-  const barHeight = 28;
-  const gap = 24;
-  const chartWidth = width - left - right;
 
-  ctx.font = "13px system-ui";
+  const isMobile = width < 420;
+  const left = isMobile ? 78 : 110;
+  const right = isMobile ? 14 : 26;
+  const top = isMobile ? 24 : 32;
+  const barHeight = isMobile ? 24 : 28;
+  const gap = isMobile ? 20 : 24;
+  const chartWidth = Math.max(width - left - right, 80);
+
+  ctx.font = isMobile ? "11px system-ui" : "13px system-ui";
   ctx.textBaseline = "middle";
 
   rows.forEach((row, index) => {
@@ -431,7 +433,7 @@ function drawHorizontalBarChart(canvasId, rows, options = {}) {
 
     ctx.fillStyle = "#6b7280";
     ctx.textAlign = "right";
-    ctx.fillText(row.label, left - 10, y + barHeight / 2);
+    ctx.fillText(row.label, left - 8, y + barHeight / 2);
 
     ctx.fillStyle = "#e5e7eb";
     ctx.fillRect(left, y, chartWidth, barHeight);
@@ -441,10 +443,11 @@ function drawHorizontalBarChart(canvasId, rows, options = {}) {
 
     ctx.fillStyle = "#1f2937";
     ctx.textAlign = "left";
-    ctx.fillText(row.display, left + Math.min(barWidth + 8, chartWidth - 60), y + barHeight / 2);
+
+    const labelX = left + Math.min(barWidth + 6, chartWidth - 44);
+    ctx.fillText(row.display, labelX, y + barHeight / 2);
   });
 }
-
 function drawCharts(result) {
   const { values, household } = result;
   drawBudgetPie(values, household);
