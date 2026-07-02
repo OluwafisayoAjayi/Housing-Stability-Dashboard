@@ -198,17 +198,241 @@
   </main>
 
   <section class="panel methodology" id="methodology">
-    <h2>Methodology</h2>
-    <p>This dashboard is a planning and screening tool, not a legal eviction prediction model. It combines household-entered budget information with local county economic indicators from ACS 5-year county data.</p>
-    <p>The household component uses housing burden, monthly budget cushion, and emergency savings coverage. Housing burden equals your monthly rent plus your monthly utilities divided by your monthly income. Monthly cushion equals your income minus rent, utilities, other essential expenses, and required debt payments. Savings coverage equals emergency savings divided by monthly essential expenses.</p>
-    <p>The county component uses poverty rate, unemployment rate, median gross rent relative to county median household income, renter share, and severe renter cost burden. These indicators are converted to bounded 0–100 pressure scores and combined into a local economic stress score. The final planning score gives greater weight to your own household budget because immediate household finances are the closest input to planning needs.</p>
-    <p><strong>Data note:</strong> The dashboard automatically uses the latest ACS 5-year county record available in <code>data/county_indicators.json</code>. In most current use, this will be the 2020–2024 ACS 5-year estimate. The dashboard does not ask users to choose a year because the data are not live 2026 observations.</p>
-    <p><strong>Important limitation:</strong> This tool does not predict eviction, provide legal advice, or determine eligibility for assistance. Housing outcomes also depend on lease terms, landlord decisions, local laws, court processes, emergency aid availability, and household circumstances not entered here.</p>
-  </section>
+  <h2>Methodology</h2>
 
-  <footer>
-    <p>Housing Stability Planning Dashboard. Use for planning, education, and research communication only.</p>
-  </footer>
+  <h3>Purpose of the dashboard</h3>
+  <p>
+    The Housing Stability Planning Dashboard is a planning and screening tool. It is designed to help users understand how their household budget situation compares with local county economic conditions. The dashboard does not predict eviction, does not provide legal advice, and does not determine eligibility for housing or utility assistance. Instead, it provides a planning score based on two types of information: household-entered budget values and county-level economic indicators.
+    The dashboard uses county level indicators from the American Community Survey (ACS) 5-year county data. The county indicators used are poverty rate, unemployment rate, median gross rent, median household income, renter share, and severe renter cost burden. Poverty rate captures the share of people in the county living below the poverty line. Unemployment rate captures the share of the labor force that is unemployed. Median gross rent measures the typical monthly rent paid in the county, including rent and utilities when reported as gross rent. Median household income measures the typical annual household income in the county. Renter share captures the share of occupied housing units occupied by renters. Severe renter cost burden captures the share of renter households with very high housing costs relative to income.
+  </p>
+
+  <p>
+    The household section asks users to enter six monthly budget values: net monthly income, monthly rent, monthly utilities, essential monthly expenses, emergency savings, and debt or required monthly payments. Net monthly income is the amount available after taxes and deductions. Monthly rent is the rent payment. Monthly utilities include electricity, heating, water, gas, internet, or similar utility payments. Essential monthly expenses include necessary costs such as food, transportation, medical costs, and childcare. Emergency savings is the amount currently available as a financial buffer. Debt or required payments include loans, credit cards, car payments, or other required monthly obligations.
+    The first household measure is housing burden. Housing burden measures the share of monthly income spent on rent and utilities.
+  </p>
+
+  <p>
+    <code>Housing costs = Monthly rent + Monthly utilities</code>
+  </p>
+
+  <p>
+    <code>Housing burden = Housing costs / Net monthly income</code>
+  </p>
+
+  <p>
+    A higher housing burden means a larger share of income is being used for housing-related costs. The dashboard compares the user's housing burden with two common reference points: 30 percent and 50 percent. A housing burden around or below 30 percent is treated as lower pressure. A housing burden above 30 percent indicates higher housing-cost pressure. A housing burden above 50 percent indicates severe housing-cost pressure.
+  </p>
+
+  <p>
+    The second household measure is monthly budget cushion. This measures how much income remains after paying rent, utilities, essential expenses, and required debt payments.
+  </p>
+
+  <p>
+    <code>Essential monthly spending = Rent + Utilities + Essential expenses + Debt or required payments</code>
+  </p>
+
+  <p>
+    <code>Monthly cushion = Net monthly income - Essential monthly spending</code>
+  </p>
+
+  <p>
+    A positive cushion means the user has money left after covering major required expenses. A small cushion means the household may be vulnerable to unexpected costs, rent increases, utility increases, or income loss. A negative cushion means the entered expenses are higher than the entered income, which indicates immediate budget pressure.
+  </p>
+
+  <p>
+    The third household measure is savings coverage. This measures how many months of essential monthly spending could be covered by the user's emergency savings.
+  </p>
+
+  <p>
+    <code>Savings coverage = Emergency savings / Essential monthly spending</code>
+  </p>
+
+  <p>
+    For example, if a household has $2,000 in savings and essential monthly spending is $1,000, the savings coverage is 2 months. The dashboard uses one month as a first buffer and three months as a stronger buffer. Savings coverage of three months or more is treated as lower pressure. Savings coverage below one month is treated as higher pressure.
+  </p>
+
+  <p>
+    Each household measure is converted into a pressure score from 0 to 100. A score of 0 means lower planning concern. A score of 100 means higher planning concern. The dashboard uses a bounded scoring method, meaning values cannot go below 0 or above 100.
+  </p>
+
+  <p>
+    The housing burden score is calculated as:
+  </p>
+
+  <p>
+    <code>Housing burden score = ((Housing burden - 0.30) / 0.40) × 100</code>
+  </p>
+
+  <p>
+    This means housing burden at or below 30 percent receives little or no pressure from this component. Housing burden around 70 percent or higher is treated as very high pressure from this component.
+  </p>
+
+  <p>
+    The cushion score is calculated by comparing the user's monthly cushion with a target equal to 10 percent of monthly income:
+  </p>
+
+  <p>
+    <code>Cushion target = Net monthly income × 0.10</code>
+  </p>
+
+  <p>
+    <code>Cushion score = ((Cushion target - Monthly cushion) / (Net monthly income × 0.30)) × 100</code>
+  </p>
+
+  <p>
+    This means a household with a cushion of at least 10 percent of income receives little or no pressure from this component. As the cushion becomes smaller or negative, the cushion pressure score increases.
+  </p>
+
+  <p>
+    The savings score is calculated as:
+  </p>
+
+  <p>
+    <code>Savings score = ((3 - Savings coverage) / 3) × 100</code>
+  </p>
+
+  <p>
+    This means savings coverage of three months or more receives little or no pressure from this component. Savings coverage close to zero receives high pressure from this component.
+  </p>
+
+  <h3>Step 5: Household planning score</h3>
+  <p>
+    The household planning score combines the three household pressure scores using weights. Housing burden receives the largest weight because rent and utilities are the most direct housing-related costs. Monthly cushion receives the next largest weight because it shows whether the household has room left in the budget after required expenses. Savings coverage receives the remaining weight because emergency savings can help protect a household from temporary income loss or unexpected costs.
+  </p>
+
+  <p>
+    <code>Household score = (Housing burden score × 0.40) + (Cushion score × 0.35) + (Savings score × 0.25)</code>
+  </p>
+
+  <p>
+    The household score ranges from 0 to 100. A higher value means greater household-level planning concern.
+  </p>
+
+  <p>
+    The county economic stress score captures the broader local economic environment. It does not determine the user's result by itself. Instead, it provides context about whether the selected county has higher poverty, unemployment, rent pressure, renter concentration, or severe renter cost burden.
+  </p>
+
+  <p>
+    Each county indicator is first converted into a 0 to 100 pressure score:
+  </p>
+
+  <p>
+    <code>Poverty score = (Poverty rate / 30) × 100</code>
+  </p>
+
+  <p>
+    <code>Unemployment score = (Unemployment rate / 12) × 100</code>
+  </p>
+
+  <p>
+    <code>Monthly median income = Median household income / 12</code>
+  </p>
+
+  <p>
+    <code>Rent pressure = Median gross rent / Monthly median income</code>
+  </p>
+
+  <p>
+    <code>Rent pressure score = ((Rent pressure - 0.20) / 0.35) × 100</code>
+  </p>
+
+  <p>
+    <code>Renter share score = (Renter share / 60) × 100</code>
+  </p>
+
+  <p>
+    <code>Severe renter cost burden score = (Severe renter cost burden rate / 35) × 100</code>
+  </p>
+
+  <p>
+    These component scores are bounded between 0 and 100. This prevents very large values from dominating the index. After the component scores are created, the dashboard combines them into a local economic stress score:
+  </p>
+
+  <p>
+    <code>County stress score = (Poverty score × 0.25) + (Unemployment score × 0.20) + (Rent pressure score × 0.25) + (Renter share score × 0.15) + (Severe renter cost burden score × 0.15)</code>
+  </p>
+
+  <p>
+    Poverty rate and rent pressure receive the largest weights because they capture broad economic hardship and housing affordability pressure in the county. Unemployment receives a substantial weight because labor market weakness can affect household income stability. Renter share and severe renter cost burden receive smaller but important weights because they describe the housing structure and the level of renter financial strain in the county.
+  </p>
+
+  <p>
+    The final score combines the household planning score with the county economic stress score. The household score receives 75 percent of the final weight, while the county stress score receives 25 percent.
+  </p>
+
+  <p>
+    <code>Final planning score = (Household score × 0.75) + (County stress score × 0.25)</code>
+  </p>
+
+  <p>
+    The dashboard gives greater weight to the household score because the user's own income, rent, utilities, essential expenses, debt payments, and savings are the most direct measures of their immediate planning situation. The county score is still included because local conditions can shape how difficult it may be to recover from financial disruptions.
+  </p>
+
+  <p>
+    The final score is grouped into four planning concern categories:
+  </p>
+
+  <ul>
+    <li><strong>0 to 24:</strong> Low planning concern. The submitted budget appears relatively manageable based on housing costs, cash flow, savings coverage, and county context.</li>
+    <li><strong>25 to 49:</strong> Moderate planning concern. The submitted budget shows some pressure points, and a rent increase, utility increase, or income loss could reduce stability.</li>
+    <li><strong>50 to 74:</strong> High planning concern. The submitted budget shows meaningful housing-cost or cash-flow pressure and may require stronger planning or support.</li>
+    <li><strong>75 to 100:</strong> Severe planning concern. The submitted budget shows strong financial pressure. This does not mean eviction will occur, but it signals that the budget situation needs attention.</li>
+  </ul>
+
+  <h3>What-if scenario calculation</h3>
+  <p>
+    After the user submits their household values, the dashboard saves those values temporarily in the browser so that the what-if scenario tool can be used. The scenario tool does not ask the user to re-enter the whole budget. Instead, it applies a selected change to income, rent, or utilities and recalculates the same household score and final score.
+  </p>
+
+  <p>
+    The preset scenarios are: no change, income decreases by 15 percent, rent increases by 10 percent, utilities increase by 25 percent, and a combined pressure scenario where income decreases by 15 percent, rent increases by 10 percent, and utilities increase by 25 percent. The custom scenario allows the user to enter their own percentage changes for income, rent, and utilities.
+  </p>
+
+  <p>
+    For example, under the income-loss scenario:
+  </p>
+
+  <p>
+    <code>Scenario income = Original income × (1 - 0.15)</code>
+  </p>
+
+  <p>
+    Under the rent-increase scenario:
+  </p>
+
+  <p>
+    <code>Scenario rent = Original rent × (1 + 0.10)</code>
+  </p>
+
+  <p>
+    Under the utility-increase scenario:
+  </p>
+
+  <p>
+    <code>Scenario utilities = Original utilities × (1 + 0.25)</code>
+  </p>
+
+  <p>
+    The dashboard then recalculates housing burden, monthly cushion, savings coverage, the household score, and the final planning score. The county stress score remains the same because the scenario changes only the household budget, not the county-level ACS indicators.
+  </p>
+
+  <p>
+    The dashboard displays a monthly budget breakdown chart using the user's submitted rent, utilities, essential expenses, debt payments, and remaining cushion. It also displays a housing burden comparison chart using the user's housing burden and the 30 percent and 50 percent reference lines. A savings coverage chart compares the user's savings coverage with one-month and three-month savings targets.
+  </p>
+
+  <p>
+    The written result summary explains the score in plain language. It reports the user's housing burden, monthly cushion, savings coverage, rent comparison with the county median gross rent, and the county stress score. The purpose is to make the score understandable rather than showing only a number.
+  </p>
+
+  <h3>Privacy and limitations</h3>
+  <p>
+    The household values entered by the user are used only in the user's browser. They are not sent to a server by this dashboard. After the user submits the form, the input boxes are cleared while the result remains visible on the page. The result can be cleared by clicking the Start over button.
+  </p>
+
+  <p>
+    This dashboard should be used for planning, education, and research communication only. It does not predict eviction, does not determine whether a household will miss rent, and does not measure legal risk. Housing outcomes depend on many factors not entered into the dashboard, including lease terms, landlord decisions, local laws, court processes, emergency assistance availability, family support, health events, job loss, and other household-specific circumstances.
+  </p>
+</section>
 
   <script src="script.js"></script>
 </body>
