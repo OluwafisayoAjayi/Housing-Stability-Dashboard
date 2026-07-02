@@ -1,0 +1,36 @@
+{
+  "status": "real_data_loaded",
+  "record_count": 22548,
+  "year_range_requested": [
+    2018,
+    2024
+  ],
+  "years_loaded": [
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024
+  ],
+  "years_skipped": [],
+  "updated_at_utc": "2026-07-01T20:50:32.421045+00:00",
+  "sources": [
+    "U.S. Census Bureau ACS 5-Year Detailed Tables",
+    "Optional data/basic_needs.csv for local basic-needs costs if provided by the user"
+  ],
+  "variables": {
+    "poverty_total": "B17001_001E",
+    "poverty_count": "B17001_002E",
+    "labor_force": "B23025_003E",
+    "unemployed": "B23025_005E",
+    "median_gross_rent": "B25064_001E",
+    "median_household_income": "B19013_001E",
+    "occupied_units": "B25003_001E",
+    "renter_occupied": "B25003_003E",
+    "rent_burden_total": "B25070_001E",
+    "rent_50_54": "B25070_010E",
+    "rent_55_plus": "B25070_011E"
+  }
+}

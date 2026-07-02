@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Housing Stability Planning Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="hero">
+    <div>
+      <p class="eyebrow">Real-data household planning dashboard</p>
+      <h1>Housing Stability Planning Dashboard</h1>
+      <p class="subtitle">Combine your household budget information with local county economic conditions from the American Community Survey.</p>
+    </div>
+    <div class="badge" id="dataBadge">Loading ACS county data...</div>
+  </header>
+
+  <main class="layout">
+    <section class="panel controls-panel">
+      <form id="plannerForm" autocomplete="off">
+        <h2>1. Your location</h2>
+        <div class="setup-warning" id="setupWarning" hidden>
+          <strong>No county data loaded yet.</strong>
+          <p>This dashboard is configured for real data only. Add your Census API key to GitHub Secrets, run the data update workflow, and the state/county menus will populate automatically.</p>
+        </div>
+
+        <div class="grid two">
+          <label>Your state
+            <select id="stateSelect" required></select>
+          </label>
+          <label>Your county
+            <select id="countySelect" required></select>
+          </label>
+        </div>
+
+        <p class="data-note">The dashboard automatically uses the latest ACS 5-year county record available.</p>
+
+        <h2>2. Your household budget</h2>
+        <div class="grid two">
+          <label>Your net monthly income ($)
+            <input id="income" type="number" min="0" step="any" placeholder="Enter monthly income" required />
+          </label>
+          <label>Your monthly rent ($)
+            <input id="rent" type="number" min="0" step="any" placeholder="Enter monthly rent" required />
+          </label>
+          <label>Your monthly utilities ($)
+            <input id="utilities" type="number" min="0" step="any" placeholder="Enter utilities" required />
+          </label>
+          <label>Your essential monthly expenses ($)
+            <input id="essentials" type="number" min="0" step="any" placeholder="Food, transport, medical, childcare" required />
+          </label>
+          <label>Your emergency savings ($)
+            <input id="savings" type="number" min="0" step="any" placeholder="Enter savings" required />
+          </label>
+          <label>Your debt or required monthly payments ($)
+            <input id="debt" type="number" min="0" step="any" placeholder="Loans, credit cards, other required payments" required />
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="primary-btn">Calculate my housing stability plan</button>
+          <button type="button" id="startOverBtn" class="secondary-btn">Start over</button>
+        </div>
+
+        <p class="privacy-note"><strong>Privacy note:</strong> Your household values are used only in your browser. They are not sent to a server by this dashboard. After you submit, the input boxes are cleared while your result remains visible.</p>
+      </form>
+    </section>
+
+    <section class="dashboard-content">
+      <section class="panel pre-result" id="preResultPanel">
+        <p class="eyebrow">Before you begin</p>
+        <h2>Enter your household information to see your result</h2>
+        <p>Choose your state and county, enter your household budget, and click <strong>Calculate my housing stability plan</strong>. Your result summary, charts, county context, and what-if plan will appear here.</p>
+      </section>
+
+      <section id="resultsContainer" class="hidden">
+        <section class="panel score-panel">
+          <div>
+            <p class="eyebrow">Your planning result</p>
+            <h2 id="riskLabel">--</h2>
+            <p id="riskText">--</p>
+          </div>
+          <div class="score-ring" id="scoreRing"><span id="scoreValue">--</span></div>
+        </section>
+
+        <section class="panel summary-panel">
+          <h2>Your result summary</h2>
+          <p id="resultSummary">--</p>
+          <p class="result-note">The values you submitted have been cleared from the input boxes for privacy. Use <strong>Start over</strong> to clear this result.</p>
+        </section>
+
+        <section class="metrics-grid">
+          <div class="metric-card">
+            <span>Your housing burden</span>
+            <strong id="housingBurden">--</strong>
+            <div class="bar"><div id="housingBurdenBar"></div></div>
+            <small>Your rent + utilities as a share of your income</small>
+          </div>
+          <div class="metric-card">
+            <span>Your monthly cushion</span>
+            <strong id="monthlyCushion">--</strong>
+            <div class="bar"><div id="cushionBar"></div></div>
+            <small>Your income left after essential costs</small>
+          </div>
+          <div class="metric-card">
+            <span>Your savings coverage</span>
+            <strong id="savingsMonths">--</strong>
+            <div class="bar"><div id="savingsBar"></div></div>
+            <small>Months of your essential expenses covered</small>
+          </div>
+          <div class="metric-card">
+            <span>Your county stress score</span>
+            <strong id="localStress">--</strong>
+            <div class="bar"><div id="localStressBar"></div></div>
+            <small>Based on local ACS county indicators</small>
+          </div>
+        </section>
+
+        <section class="panel charts-panel">
+          <h2>Your charts</h2>
+          <div class="charts-grid">
+            <div class="chart-card">
+              <h3>Your monthly budget breakdown</h3>
+              <canvas id="budgetPie" height="260"></canvas>
+              <div id="budgetLegend" class="legend"></div>
+            </div>
+            <div class="chart-card">
+              <h3>Your housing burden compared with thresholds</h3>
+              <canvas id="burdenChart" height="260"></canvas>
+              <p class="chart-note">The 30% and 50% lines are common affordability reference points.</p>
+            </div>
+            <div class="chart-card">
+              <h3>Your savings coverage compared with targets</h3>
+              <canvas id="savingsChart" height="260"></canvas>
+              <p class="chart-note">One month is a first buffer; three months is a stronger buffer.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel context-panel">
+          <h2>Your county context</h2>
+          <p class="muted">Selected county: <strong id="selectedPlace">--</strong></p>
+          <div class="context-grid">
+            <div><span>Poverty rate</span><strong id="povertyRate">--</strong></div>
+            <div><span>Unemployment rate</span><strong id="unemploymentRate">--</strong></div>
+            <div><span>Median gross rent</span><strong id="medianRent">--</strong></div>
+            <div><span>Median household income</span><strong id="medianIncome">--</strong></div>
+            <div><span>Renter share</span><strong id="renterShare">--</strong></div>
+            <div><span>Severe renter cost burden</span><strong id="severeRentBurden">--</strong></div>
+            <div><span>Basic monthly cost</span><strong id="basicNeeds">Optional</strong></div>
+            <div><span>Data vintage</span><strong id="contextYear">--</strong></div>
+          </div>
+        </section>
+
+        <section class="panel scenario-panel">
+          <h2>Your what-if planning scenario</h2>
+          <p class="muted">Choose a simple scenario instead of moving sliders. The dashboard uses your last submitted values.</p>
+          <div class="scenario-controls">
+            <label>Your scenario
+              <select id="scenarioSelect">
+                <option value="no_change">No change</option>
+                <option value="income_loss">Income decreases by 15%</option>
+                <option value="rent_increase">Rent increases by 10%</option>
+                <option value="utility_increase">Utilities increase by 25%</option>
+                <option value="combined">Combined pressure: income -15%, rent +10%, utilities +25%</option>
+                <option value="custom">Custom scenario</option>
+              </select>
+            </label>
+
+            <div id="customScenarioInputs" class="grid three hidden">
+              <label>Your income change (%)
+                <input id="customIncomeChange" type="number" step="1" placeholder="Example: -10" />
+              </label>
+              <label>Your rent change (%)
+                <input id="customRentChange" type="number" step="1" placeholder="Example: 5" />
+              </label>
+              <label>Your utility change (%)
+                <input id="customUtilityChange" type="number" step="1" placeholder="Example: 15" />
+              </label>
+            </div>
+          </div>
+
+          <div class="scenario-grid">
+            <div><span>Your scenario score</span><strong id="scenarioScore">--</strong></div>
+            <div><span>Your scenario burden</span><strong id="scenarioBurden">--</strong></div>
+            <div><span>Your scenario cushion</span><strong id="scenarioCushion">--</strong></div>
+            <div><span>Your score change</span><strong id="scoreChange">--</strong></div>
+          </div>
+        </section>
+
+        <section class="panel guidance-panel">
+          <h2>Your next steps</h2>
+          <ul id="guidanceList"></ul>
+        </section>
+      </section>
+    </section>
+  </main>
+
+  <section class="panel methodology" id="methodology">
+    <h2>Methodology</h2>
+    <p>This dashboard is a planning and screening tool, not a legal eviction prediction model. It combines household-entered budget information with local county economic indicators from ACS 5-year county data.</p>
+    <p>The household component uses housing burden, monthly budget cushion, and emergency savings coverage. Housing burden equals your monthly rent plus your monthly utilities divided by your monthly income. Monthly cushion equals your income minus rent, utilities, other essential expenses, and required debt payments. Savings coverage equals emergency savings divided by monthly essential expenses.</p>
+    <p>The county component uses poverty rate, unemployment rate, median gross rent relative to county median household income, renter share, and severe renter cost burden. These indicators are converted to bounded 0–100 pressure scores and combined into a local economic stress score. The final planning score gives greater weight to your own household budget because immediate household finances are the closest input to planning needs.</p>
+    <p><strong>Data note:</strong> The dashboard automatically uses the latest ACS 5-year county record available in <code>data/county_indicators.json</code>. In most current use, this will be the 2020–2024 ACS 5-year estimate. The dashboard does not ask users to choose a year because the data are not live 2026 observations.</p>
+    <p><strong>Important limitation:</strong> This tool does not predict eviction, provide legal advice, or determine eligibility for assistance. Housing outcomes also depend on lease terms, landlord decisions, local laws, court processes, emergency aid availability, and household circumstances not entered here.</p>
+  </section>
+
+  <footer>
+    <p>Housing Stability Planning Dashboard. Use for planning, education, and research communication only.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
